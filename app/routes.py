@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, session, flash
 from flask import Blueprint
-from .auth import login_user, register_user
+from .auth import login_user, register_user, confirm_register
 
 # Define a Blueprint (optional but recommended for larger apps)
 main = Blueprint('main', __name__)
@@ -47,8 +47,25 @@ def register():
 
         if response:
             flash('Registration successful! Please check your email to confirm your account.', 'success')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.confirm'))
         else:
             flash('An error occurred during registration. Please try again.', 'danger')
 
     return render_template('register.html')
+
+@auth.route('/confirm', methods=['GET', 'POST'])
+def confirm():
+    if request.method == 'POST':
+        # Extract data from the form
+        username = request.form['username']
+        confirmation_code = request.form['confirmation_code']
+
+        response = confirm_register(username, confirmation_code)
+        # Call the confirm_sign_up function to confirm the user
+        if response:
+            flash('Account confirmed successfully! You can now log in.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash(f'An error occurred during confirmation. Please try again.', 'danger')
+
+    return render_template('confirm.html')

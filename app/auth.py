@@ -59,7 +59,7 @@ def register_user(username, password, email, name, family_name, birthdate, gende
         return None
 
 
-def confirm_signup(username, confirmation_code):
+def confirm_register(username, confirmation_code):
     """Confirm a user after signup with Cognito"""
     try:
         response = client.confirm_sign_up(
