@@ -1,0 +1,104 @@
+<!-- events.html -->
+{% extends "base.html" %}
+{% block title %}Create Event{% endblock %}
+{% block content %}
+<h2>Create Event</h2>
+<p>Manage and schedule events for your nightclub here.</p>
+
+<!-- Flash messages for feedback -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div>
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('events.create_event') }}">
+    <!-- Event Details -->
+    <div class="row">
+        <!-- Left Column: Event Details -->
+        <div class="col-md-6">
+            <h3>Event Details</h3>
+            <div class="form-group">
+                <label for="event_name">Event Name</label>
+                <input type="text" class="form-control" id="event_name" name="event_name" required value="{{ event.get('event_name', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label for="event_start">Start Date & Time</label>
+                <input type="datetime-local" class="form-control" id="event_start" name="event_start" required value="{{ event.get('event_start', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label for="event_end">End Date & Time</label>
+                <input type="datetime-local" class="form-control" id="event_end" name="event_end" required value="{{ event.get('event_end', '') }}">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location (Address)</label>
+                <input type="text" class="form-control" id="location" name="location" required value="{{ event.get('location', '') }}">
+            </div>
+        </div>
+
+        <!-- Right Column: Ticket Releases -->
+        <div class="col-md-6">
+            <!-- Navigation for Releases -->
+            <ul class="nav nav-tabs" id="release-nav">
+                {% for i in range(event.get('releases', [])|length) %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if loop.index == 1 %}active{% endif %}" id="release-tab-{{ i+1 }}" href="#release-{{ i+1 }}" data-toggle="tab">Release {{ i+1 }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <!-- Ticket Releases Content -->
+            <div id="releases-container" class="tab-content">
+                {% for i in range(event.get('releases', [])|length) %}
+                    <div class="tab-pane fade {% if loop.index == 1 %}show active{% endif %}" id="release-{{ i+1 }}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5>Release {{ i+1 }}</h5>
+                            <form action="{{ url_for('events.remove_release', index=i) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Remove Release</button>
+                            </form>
+                        </div>
+                        <div class="form-group">
+                            <label for="release_name_{{ i+1 }}">Name of the Release</label>
+                            <input type="text" class="form-control" id="release_name_{{ i+1 }}" name="release_name_{{ i+1 }}" required value="{{ event['releases'][i].get('name', '') }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="release_price_{{ i+1 }}">Price (€)</label>
+                            <input type="number" class="form-control" id="release_price_{{ i+1 }}" name="release_price_{{ i+1 }}" step="0.01" required value="{{ event['releases'][i].get('price', '') }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="release_quantity_{{ i+1 }}">Quantity of Tickets</label>
+                            <input type="number" class="form-control" id="release_quantity_{{ i+1 }}" name="release_quantity_{{ i+1 }}" required value="{{ event['releases'][i].get('quantity', '') }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="release_max_date_{{ i+1 }}">Maximum Date of Release Availability</label>
+                            <input type="datetime-local" class="form-control" id="release_max_date_{{ i+1 }}" name="release_max_date_{{ i+1 }}" required value="{{ event['releases'][i].get('max_date', '') }}">
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <form action="{{ url_for('events.add_release') }}" method="POST">
+                <button type="submit" class="btn btn-secondary mt-3">+ Add Release</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary">Post Event</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
