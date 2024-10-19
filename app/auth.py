@@ -35,7 +35,7 @@ def login_user(username, password):
         return None
 
 
-def signup_user(username, password, email):
+def register_user(username, password, email, name, family_name, birthdate, gender, phone_number, address):
     """Signup a new user with Cognito"""
     try:
         response = client.sign_up(
@@ -43,10 +43,13 @@ def signup_user(username, password, email):
             Username=username,
             Password=password,
             UserAttributes=[
-                {
-                    'Name': 'email',
-                    'Value': email
-                }
+                {'Name': 'email', 'Value': email},
+                {'Name': 'name', 'Value': name},
+                {'Name': 'family_name', 'Value': family_name},
+                {'Name': 'birthdate', 'Value': birthdate},
+                {'Name': 'gender', 'Value': gender},
+                {'Name': 'phone_number', 'Value': phone_number},
+                {'Name': 'address', 'Value': address}
             ]
         )
         return response
