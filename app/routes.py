@@ -1,11 +1,13 @@
 from flask import render_template, redirect, url_for, request, session, flash
 from flask import Blueprint
 from .auth import login_user, register_user, confirm_register
+import datetime as dt
+from .models import Event, db
+
 
 # Define a Blueprint (optional but recommended for larger apps)
 main = Blueprint('main', __name__)
 auth = Blueprint('auth', __name__)
-events = Blueprint('events', __name__)
 
 @main.route('/')
 def home():
@@ -24,7 +26,7 @@ def login():
             # Store token in session or wherever you need it
             session['id_token'] = token
             flash('Login successful!', 'success')
-            return redirect(url_for('events.create_event'))
+            return redirect(url_for('main.create_event'))
         else:
             flash('Login failed. Please check your credentials.', 'danger')
 
@@ -77,52 +79,59 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
 
-
-@events.route('/events', methods=['GET', 'POST'])
+@main.route('/events', methods=['GET', 'POST'])
 def create_event():
-    if 'releases' not in session:
-        session['releases'] = [{}]  # Start with one empty release
-
     if request.method == 'POST':
-        # Save event data in session (or persist in a database as per your requirement)
-        session['event_name'] = request.form.get('event_name')
-        session['event_start'] = request.form.get('event_start')
-        session['event_end'] = request.form.get('event_end')
-        session['location'] = request.form.get('location')
+        # Collect Event Details
+        event_name = request.form.get('event_name')
+        start_datetime = request.form.get('event_start')
+        end_datetime = request.form.get('event_end')
+        location = request.form.get('location')
 
-        # Save releases data
-        releases = []
-        for i in range(len(session['releases'])):
-            release = {
-                'name': request.form.get(f'release_name_{i+1}'),
-                'price': request.form.get(f'release_price_{i+1}'),
-                'quantity': request.form.get(f'release_quantity_{i+1}'),
-                'max_date': request.form.get(f'release_max_date_{i+1}')
-            }
-            releases.append(release)
-        session['releases'] = releases
+        # Convert dates from string to datetime if provided
+        start_datetime = dt.datetime.strptime(start_datetime, '%Y-%m-%dT%H:%M')
+        end_datetime = dt.datetime.strptime(end_datetime, '%Y-%m-%dT%H:%M')
 
-        flash('Event data saved!', 'success')
-        return redirect(url_for('events.create_event'))
+        # Set up a dictionary to hold release data
+        releases_data = {}
+        for i in range(1, 6):
+            releases_data.update({f"release_{i}_name": None,
+                                   f"release_{i}_price": None, 
+                                   f"release_{i}_quantity": None, 
+                                   f"release_{i}_max_date": None})
 
-    return render_template('events.html', event=session)
+        # Iterate over the available releases in the form submission
+        for i in range(1, 6):
+            release_name = request.form.get(f'release_name_{i}')
+            release_price = request.form.get(f'release_price_{i}')
+            release_quantity = request.form.get(f'release_quantity_{i}')
+            release_max_date = request.form.get(f'release_max_date_{i}')
 
-@events.route('/add_release', methods=['POST'])
-def add_release():
-    if 'releases' not in session:
-        session['releases'] = [{}]
+            # Set release values if they exist in the form
+            if release_name:
+                releases_data[f'release_{i}_name'] = release_name
+            if release_price:
+                releases_data[f'release_{i}_price'] = float(release_price)
+            if release_quantity:
+                releases_data[f'release_{i}_quantity'] = int(release_quantity)
+            if release_max_date:
+                releases_data[f'release_{i}_max_date'] = dt.datetime.strptime(release_max_date, '%Y-%m-%dT%H:%M')
 
-    if len(session['releases']) < 5:
-        session['releases'].append({})  # Add an empty release
+        # Create new Event object with dynamic release data
+        event = Event(
+            event_name=event_name,
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
+            location=location,
+            **releases_data  # Unpack the dictionary to fill release fields
+        )
 
-    return redirect(url_for('events.create_event'))
+        # Add and commit the event to the database
+        db.session.add(event)
+        db.session.commit()
 
-@events.route('/remove_release/<int:index>', methods=['POST'])
-def remove_release(index):
-    if 'releases' in session and len(session['releases']) > 1:
-        releases = session['releases']
-        if 0 <= index < len(releases):
-            del releases[index]
-        session['releases'] = releases
+        flash('Event created successfully!', 'success')
+        return redirect(url_for('main.create_event'))
 
-    return redirect(url_for('events.create_event'))
+    # On GET request, render the page
+    return render_template('events.html')

@@ -5,41 +5,34 @@
 <h2>Create Event</h2>
 <p>Manage and schedule events for your nightclub here.</p>
 
-<!-- Flash messages for feedback -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <div>
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-        </div>
-    {% endif %}
-{% endwith %}
-
-<form method="POST" action="{{ url_for('events.create_event') }}">
-    <!-- Event Details -->
+<form method="POST" action="/events">
     <div class="row">
         <!-- Left Column: Event Details -->
         <div class="col-md-6">
             <h3>Event Details</h3>
             <div class="form-group">
                 <label for="event_name">Event Name</label>
-                <input type="text" class="form-control" id="event_name" name="event_name" required value="{{ event.get('event_name', '') }}">
+                <input type="text" class="form-control" id="event_name" name="event_name" required>
             </div>
 
             <div class="form-group">
                 <label for="event_start">Start Date & Time</label>
-                <input type="datetime-local" class="form-control" id="event_start" name="event_start" required value="{{ event.get('event_start', '') }}">
+                <input type="datetime-local" class="form-control" id="event_start" name="event_start" required>
             </div>
 
             <div class="form-group">
                 <label for="event_end">End Date & Time</label>
-                <input type="datetime-local" class="form-control" id="event_end" name="event_end" required value="{{ event.get('event_end', '') }}">
+                <input type="datetime-local" class="form-control" id="event_end" name="event_end" required>
             </div>
 
             <div class="form-group">
                 <label for="location">Location (Address)</label>
-                <input type="text" class="form-control" id="location" name="location" required value="{{ event.get('location', '') }}">
+                <input type="text" class="form-control" id="location" name="location" required>
+            </div>
+
+            <!-- Post Event Button -->
+            <div class="d-flex justify-content-start align-items-center mt-3">
+                <button type="submit" class="btn btn-primary">Post Event</button>
             </div>
         </div>
 
@@ -47,58 +40,168 @@
         <div class="col-md-6">
             <!-- Navigation for Releases -->
             <ul class="nav nav-tabs" id="release-nav">
-                {% for i in range(event.get('releases', [])|length) %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if loop.index == 1 %}active{% endif %}" id="release-tab-{{ i+1 }}" href="#release-{{ i+1 }}" data-toggle="tab">Release {{ i+1 }}</a>
-                    </li>
-                {% endfor %}
+                <li class="nav-item">
+                    <a class="nav-link active" id="release-tab-1" href="#" onclick="showRelease(1)">Release 1</a>
+                </li>
             </ul>
 
             <!-- Ticket Releases Content -->
-            <div id="releases-container" class="tab-content">
-                {% for i in range(event.get('releases', [])|length) %}
-                    <div class="tab-pane fade {% if loop.index == 1 %}show active{% endif %}" id="release-{{ i+1 }}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5>Release {{ i+1 }}</h5>
-                            <form action="{{ url_for('events.remove_release', index=i) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm">Remove Release</button>
-                            </form>
-                        </div>
-                        <div class="form-group">
-                            <label for="release_name_{{ i+1 }}">Name of the Release</label>
-                            <input type="text" class="form-control" id="release_name_{{ i+1 }}" name="release_name_{{ i+1 }}" required value="{{ event['releases'][i].get('name', '') }}">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="release_price_{{ i+1 }}">Price (€)</label>
-                            <input type="number" class="form-control" id="release_price_{{ i+1 }}" name="release_price_{{ i+1 }}" step="0.01" required value="{{ event['releases'][i].get('price', '') }}">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="release_quantity_{{ i+1 }}">Quantity of Tickets</label>
-                            <input type="number" class="form-control" id="release_quantity_{{ i+1 }}" name="release_quantity_{{ i+1 }}" required value="{{ event['releases'][i].get('quantity', '') }}">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="release_max_date_{{ i+1 }}">Maximum Date of Release Availability</label>
-                            <input type="datetime-local" class="form-control" id="release_max_date_{{ i+1 }}" name="release_max_date_{{ i+1 }}" required value="{{ event['releases'][i].get('max_date', '') }}">
-                        </div>
+            <div id="releases-container">
+                <div class="release" id="release-1">
+                    <div class="form-group">
+                        <label for="release_name_1">Name of the Release</label>
+                        <input type="text" class="form-control release-name" id="release_name_1" name="release_name_1" required oninput="updateReleaseTabName(1)">
                     </div>
-                {% endfor %}
+
+                    <div class="form-group">
+                        <label for="release_price_1">Price (€)</label>
+                        <input type="number" class="form-control" id="release_price_1" name="release_price_1" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="release_quantity_1">Quantity of Tickets</label>
+                        <input type="number" class="form-control" id="release_quantity_1" name="release_quantity_1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="release_max_date_1">Maximum Date of Release Availability</label>
+                        <input type="datetime-local" class="form-control" id="release_max_date_1" name="release_max_date_1" required>
+                    </div>
+                </div>
             </div>
 
-            <form action="{{ url_for('events.add_release') }}" method="POST">
-                <button type="submit" class="btn btn-secondary mt-3">+ Add Release</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Submit Button -->
-    <div class="row">
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-primary">Post Event</button>
+            <!-- Add and Remove Release Buttons -->
+            <div class="d-flex justify-content-between mt-3">
+                <button type="button" class="btn btn-secondary" id="add-release-btn">+ Add Release</button>
+                <button type="button" class="btn btn-danger" id="remove-release-btn" onclick="removeCurrentRelease()">Remove Release</button>
+            </div>
         </div>
     </div>
 </form>
-{% endblock %}
 
+<!-- JavaScript to handle adding, removing, and updating releases -->
+<script>
+    let releaseCount = 1;
+
+    // Function to add a new release
+    document.getElementById('add-release-btn').addEventListener('click', function() {
+        if (releaseCount >= 5) {
+            alert("You can only add up to 5 ticket releases.");
+            return;
+        }
+
+        releaseCount++;
+
+        // Add new tab for the release
+        const releaseNav = document.getElementById('release-nav');
+        const newNavItem = document.createElement('li');
+        newNavItem.classList.add('nav-item');
+        newNavItem.innerHTML = `
+            <a class="nav-link" id="release-tab-${releaseCount}" href="#" onclick="showRelease(${releaseCount})">Release ${releaseCount}</a>
+        `;
+        releaseNav.appendChild(newNavItem);
+
+        // Add new release content
+        const releasesContainer = document.getElementById('releases-container');
+        const releaseDiv = document.createElement('div');
+        releaseDiv.classList.add('release');
+        releaseDiv.id = `release-${releaseCount}`;
+        releaseDiv.style.display = 'none';
+        releaseDiv.innerHTML = `
+            <div class="form-group">
+                <label for="release_name_${releaseCount}">Name of the Release</label>
+                <input type="text" class="form-control release-name" id="release_name_${releaseCount}" name="release_name_${releaseCount}" required oninput="updateReleaseTabName(${releaseCount})">
+            </div>
+            <div class="form-group">
+                <label for="release_price_${releaseCount}">Price (€)</label>
+                <input type="number" class="form-control" id="release_price_${releaseCount}" name="release_price_${releaseCount}" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="release_quantity_${releaseCount}">Quantity of Tickets</label>
+                <input type="number" class="form-control" id="release_quantity_${releaseCount}" name="release_quantity_${releaseCount}" required>
+            </div>
+            <div class="form-group">
+                <label for="release_max_date_${releaseCount}">Maximum Date of Release Availability</label>
+                <input type="datetime-local" class="form-control" id="release_max_date_${releaseCount}" name="release_max_date_${releaseCount}" required>
+            </div>
+        `;
+        releasesContainer.appendChild(releaseDiv);
+
+        // Automatically show the newly added release
+        showRelease(releaseCount);
+    });
+
+    // Function to remove the currently selected release
+    function removeCurrentRelease() {
+        if (releaseCount <= 1) {
+            alert("You must have at least one release.");
+            return;
+        }
+
+        const currentReleaseNumber = document.querySelector('.nav-link.active').id.split('-')[2];
+        const release = document.getElementById(`release-${currentReleaseNumber}`);
+        const navLink = document.getElementById(`release-tab-${currentReleaseNumber}`);
+
+        // Remove the release tab and release content
+        if (release) {
+            release.remove();
+        }
+        if (navLink) {
+            navLink.remove();
+        }
+
+        // Adjust the release count
+        releaseCount--;
+
+        // Update IDs and labels for the remaining releases
+        const releases = document.querySelectorAll('.release');
+        const navLinks = document.querySelectorAll('.nav-link');
+        releases.forEach((release, index) => {
+            release.id = `release-${index + 1}`;
+            release.querySelector('.release-name').setAttribute('oninput', `updateReleaseTabName(${index + 1})`);
+            release.querySelectorAll('input').forEach(input => {
+                input.id = input.id.replace(/\d+$/, index + 1);
+                input.name = input.name.replace(/\d+$/, index + 1);
+            });
+        });
+
+        navLinks.forEach((link, index) => {
+            link.id = `release-tab-${index + 1}`;
+            link.setAttribute('onclick', `showRelease(${index + 1})`);
+            if (link.innerText.startsWith('Release')) {
+                link.innerText = `Release ${index + 1}`;
+            }
+        });
+
+        // Show the first available release by default
+        if (releaseCount > 0) {
+            showRelease(1);
+        }
+    }
+
+    // Function to show the selected release and hide the others
+    function showRelease(releaseNumber) {
+        for (let i = 1; i <= releaseCount; i++) {
+            const release = document.getElementById(`release-${i}`);
+            const navLink = document.getElementById(`release-tab-${i}`);
+            if (i === releaseNumber) {
+                release.style.display = 'block';
+                navLink.classList.add('active');
+            } else {
+                release.style.display = 'none';
+                navLink.classList.remove('active');
+            }
+        }
+    }
+
+    // Function to update the navigation tab name based on input in the release name field
+    function updateReleaseTabName(releaseNumber) {
+        const releaseNameInput = document.getElementById(`release_name_${releaseNumber}`);
+        const releaseTab = document.getElementById(`release-tab-${releaseNumber}`);
+        releaseTab.innerText = releaseNameInput.value || `Release ${releaseNumber}`;
+    }
+
+    // Show the first release by default
+    showRelease(1);
+</script>
+{% endblock %}
