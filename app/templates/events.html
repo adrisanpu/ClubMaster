@@ -270,7 +270,7 @@
 
 <script>
     // Load event details data from the server into a JavaScript variable   
-    const eventDetailsData = {{ events | tojson | safe }};
+    const eventDetailsData = {{ events|default([]) | tojson | safe }};
     
     // Event details data from the server, events is a dictionary of event details
     console.log(eventDetailsData); // Corrected variable name
