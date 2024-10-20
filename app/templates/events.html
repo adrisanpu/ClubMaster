@@ -2,85 +2,99 @@
 {% extends "base.html" %}
 {% block title %}Create Event{% endblock %}
 {% block content %}
-<h2>Create Event</h2>
-<p>Manage and schedule events for your nightclub here.</p>
 
-<form method="POST" action="/events">
-    <div class="row">
-        <!-- Left Column: Event Details -->
-        <div class="col-md-6">
-            <h3>Event Details</h3>
-            <div class="form-group">
-                <label for="event_name">Event Name</label>
-                <input type="text" class="form-control" id="event_name" name="event_name" required>
-            </div>
+<!-- Button to Toggle Event Form Visibility -->
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-success mt-4" onclick="toggleCreateEventForm()">Create New Event</button>
+</div>
+<div id="createEventForm" class="bg-light p-4 mt-3" style="display: none;">
+    <form method="POST" action="/events">
+        <div class="row">
+            <!-- Left Column: Event Details -->
+            <div class="col-md-6">
+                <h3>Event Details</h3>
+                <div class="form-group">
+                    <label for="event_name">Event Name</label>
+                    <input type="text" class="form-control" id="event_name" name="event_name" required>
+                </div>
 
-            <div class="form-group">
-                <label for="event_start">Start Date & Time</label>
-                <input type="datetime-local" class="form-control" id="event_start" name="event_start" required>
-            </div>
+                <div class="form-group">
+                    <label for="event_start">Start Date & Time</label>
+                    <input type="datetime-local" class="form-control" id="event_start" name="event_start" required>
+                </div>
 
-            <div class="form-group">
-                <label for="event_end">End Date & Time</label>
-                <input type="datetime-local" class="form-control" id="event_end" name="event_end" required>
-            </div>
+                <div class="form-group">
+                    <label for="event_end">End Date & Time</label>
+                    <input type="datetime-local" class="form-control" id="event_end" name="event_end" required>
+                </div>
 
-            <div class="form-group">
-                <label for="location">Location (Address)</label>
-                <input type="text" class="form-control" id="location" name="location" required>
-            </div>
+                <div class="form-group">
+                    <label for="location">Location (Address)</label>
+                    <input type="text" class="form-control" id="location" name="location" required>
+                </div>
 
-            <!-- Post Event Button -->
-            <div class="d-flex justify-content-start align-items-center mt-3">
-                <button type="submit" class="btn btn-primary">Post Event</button>
-            </div>
-        </div>
-
-        <!-- Right Column: Ticket Releases -->
-        <div class="col-md-6">
-            <!-- Navigation for Releases -->
-            <ul class="nav nav-tabs" id="release-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" id="release-tab-1" href="#" onclick="showRelease(1)">Release 1</a>
-                </li>
-            </ul>
-
-            <!-- Ticket Releases Content -->
-            <div id="releases-container">
-                <div class="release" id="release-1">
-                    <div class="form-group">
-                        <label for="release_name_1">Name of the Release</label>
-                        <input type="text" class="form-control release-name" id="release_name_1" name="release_name_1" required oninput="updateReleaseTabName(1)">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="release_price_1">Price (€)</label>
-                        <input type="number" class="form-control" id="release_price_1" name="release_price_1" step="0.01" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="release_quantity_1">Quantity of Tickets</label>
-                        <input type="number" class="form-control" id="release_quantity_1" name="release_quantity_1" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="release_max_date_1">Maximum Date of Release Availability</label>
-                        <input type="datetime-local" class="form-control" id="release_max_date_1" name="release_max_date_1" required>
-                    </div>
+                <!-- Post Event Button -->
+                <div class="d-flex justify-content-start align-items-center mt-3">
+                    <button type="submit" class="btn btn-primary">Post Event</button>
                 </div>
             </div>
 
-            <!-- Add and Remove Release Buttons -->
-            <div class="d-flex justify-content-between mt-3">
-                <button type="button" class="btn btn-secondary" id="add-release-btn">+ Add Release</button>
-                <button type="button" class="btn btn-danger" id="remove-release-btn" onclick="removeCurrentRelease()">Remove Release</button>
+            <!-- Right Column: Ticket Releases -->
+            <div class="col-md-6">
+                <!-- Navigation for Releases -->
+                <ul class="nav nav-tabs" id="release-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="release-tab-1" href="#" onclick="showRelease(1)">Release 1</a>
+                    </li>
+                </ul>
+
+                <!-- Ticket Releases Content -->
+                <div id="releases-container">
+                    <div class="release" id="release-1">
+                        <div class="form-group">
+                            <label for="release_name_1">Name of the Release</label>
+                            <input type="text" class="form-control release-name" id="release_name_1" name="release_name_1" required oninput="updateReleaseTabName(1)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="release_price_1">Price (€)</label>
+                            <input type="number" class="form-control" id="release_price_1" name="release_price_1" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="release_quantity_1">Quantity of Tickets</label>
+                            <input type="number" class="form-control" id="release_quantity_1" name="release_quantity_1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="release_max_date_1">Maximum Date of Release Availability</label>
+                            <input type="datetime-local" class="form-control" id="release_max_date_1" name="release_max_date_1" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add and Remove Release Buttons -->
+                <div class="d-flex justify-content-between mt-3">
+                    <button type="button" class="btn btn-secondary" id="add-release-btn">+ Add Release</button>
+                    <button type="button" class="btn btn-danger" id="remove-release-btn" onclick="removeCurrentRelease()">Remove Release</button>
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 
 <!-- JavaScript to handle adding, removing, and updating releases -->
 <script>
+
+    function toggleCreateEventForm() {
+        const form = document.getElementById('createEventForm');
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+        } else {
+            form.style.display = 'none';
+        }
+    }
+
     let releaseCount = 1;
 
     // Function to add a new release
@@ -204,4 +218,153 @@
     // Show the first release by default
     showRelease(1);
 </script>
+
+<!-- Event Filtering and Booking Container -->
+<div class="row mt-5">
+    <div class="col-md-3">
+        <!-- Navigation Menu for Filtering Events -->
+        <div class="bg-light p-3">
+            <div class="form-group">
+                <select class="form-control" id="yearSelect">
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <select class="form-control" id="monthSelect">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="filterEvents()">Filter</button>
+            <h5 class="mt-4">Events</h5>
+            <ul class="list-group" id="eventList">
+                <!-- This will be dynamically populated based on year and month selection -->
+                {% for event in events %}
+                    <li class="list-group-item" onclick="selectEvent({{ event.event_id }})">
+                        {{ event.event_name }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <!-- Booking Information Container -->
+        <div id="eventDetails" class="bg-light p-4">
+            <h4>Event Details</h4>
+            <p>Select an event from the list to view all details about it.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load event details data from the server into a JavaScript variable   
+    const eventDetailsData = {{ events | tojson | safe }};
+    
+    // Event details data from the server, events is a dictionary of event details
+    console.log(eventDetailsData); // Corrected variable name
+
+    function filterEvents() {
+        const year = document.getElementById('yearSelect').value;
+        const month = document.getElementById('monthSelect').value;
+
+        // Redirect to view-events route with year and month as query parameters
+        window.location.href = `/view-events?year=${year}&month=${month}`;
+    }
+
+    function selectEvent(eventId) {
+        // try to find the selected event in the eventDetailsData
+        const selectedEvent = null;
+        try{
+            selectedEvent = eventDetailsData.find(event => event.event_id === eventId);
+        }
+        catch (error){
+            alert('Event not found!');
+            return;
+        }
+
+        // Format the event details for displaying
+        const eventDetailsContainer = document.getElementById('eventDetails');
+        eventDetailsContainer.innerHTML = `
+            <div class="container">
+                <!-- First Row: Event Name and Location -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h4>${selectedEvent.event_name ? selectedEvent.event_name : 'N/A'}</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>${selectedEvent.location ? selectedEvent.location : 'N/A'}</h4>
+                    </div>
+                </div>
+                <!-- Second Row: Start Date and End Date -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Starts at:</strong> ${formatDate(selectedEvent.start_datetime)}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Ends at:</strong> ${formatDate(selectedEvent.end_datetime)}</p>
+                    </div>
+                </div>
+                <!-- Ticket Releases in One Row -->
+                <div class="row">
+                    ${generateReleasesHTML(selectedEvent)}
+                </div>
+            </div>
+        `;
+    }
+
+    // Utility function to safely format date values
+    function formatDate(dateString) {
+        if (!dateString || dateString === 'NaT') {
+            return 'N/A';
+        }
+
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? 'N/A' : date.toLocaleString();
+    }
+
+    function generateReleasesHTML(event) {
+        let releasesHTML = '';
+        
+        for (let i = 1; i <= 5; i++) {
+            // Extract release details
+            const releaseName = event[`release_${i}_name`];
+            const releasePrice = event[`release_${i}_price`];
+            const releaseQuantity = event[`release_${i}_quantity`];
+            const releaseMaxDate = event[`release_${i}_max_date`];
+
+            // Check if the release details are valid, i.e., not empty or 'N/A'
+            if (!releaseName || releaseName === 'N/A') {
+                continue; // Skip empty or invalid releases
+            }
+
+            releasesHTML += `
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">${releaseName}</h6>
+                            <p class="card-text"><strong>Price:</strong> €${releasePrice !== undefined && releasePrice !== null ? releasePrice : 'N/A'}</p>
+                            <p class="card-text"><strong>Quantity:</strong> ${releaseQuantity !== undefined && releaseQuantity !== null ? releaseQuantity : 'N/A'}</p>
+                            <p class="card-text"><strong>Available until:</strong> ${formatDate(releaseMaxDate)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        return releasesHTML || '<div class="col-12"><p>No releases available for this event.</p></div>';
+    }
+</script>
+
 {% endblock %}
