@@ -1,6 +1,7 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, redirect, url_for, flash
 from app.models import Event
 import pandas as pd
+from app.models import Event, db
 
 
 # Define a Blueprint (optional but recommended for larger apps)
@@ -65,3 +66,30 @@ def view_events():
 
     # Render the HTML page with filtered events
     return render_template('events.html', events=filtered_events)
+
+@test.route('/delete-event', methods=['GET'])
+def delete_event():
+    # Extract event_id from query parameters
+    event_id = request.args.get('event_id')
+    if not event_id:
+        flash("Event ID is required to delete an event.", "danger")
+        return redirect(url_for('test.view_events'))
+
+    # Actual deletion logic using SQLAlchemy
+    try:
+        event = Event.query.get(event_id)
+        if event is None:
+            flash("Event not found.", "danger")
+            return redirect(url_for('test.view_events'))
+
+        db.session.delete(event)
+        db.session.commit()
+        flash(f"Event with ID {event_id} has been successfully deleted.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"An error occurred while deleting the event: {str(e)}", "danger")
+
+    # Redirect to events view after deletion
+    return redirect(url_for('test.view_events'))
+
+

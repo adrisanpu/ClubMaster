@@ -252,7 +252,7 @@
             <ul class="list-group" id="eventList">
                 <!-- This will be dynamically populated based on year and month selection -->
                 {% for event in events %}
-                    <li class="list-group-item" onclick="selectEvent({{ event.event_id }})">
+                    <li class="list-group-item" onclick="selectEvent({{ event.event_id}})">
                         {{ event.event_name }}
                     </li>
                 {% endfor %}
@@ -270,8 +270,7 @@
 
 <script>
     // Load event details data from the server into a JavaScript variable   
-    const eventDetailsData = {{ events|default([]) | tojson | safe }};
-    
+    const eventDetailsData = {{ events | tojson | safe }};
     // Event details data from the server, events is a dictionary of event details
     console.log(eventDetailsData); // Corrected variable name
 
@@ -285,15 +284,11 @@
 
     function selectEvent(eventId) {
         // try to find the selected event in the eventDetailsData
-        const selectedEvent = null;
-        try{
-            selectedEvent = eventDetailsData.find(event => event.event_id === eventId);
-        }
-        catch (error){
+        const selectedEvent = eventDetailsData.find(event => event.event_id == eventId);
+        if (!selectedEvent) {
             alert('Event not found!');
             return;
         }
-
         // Format the event details for displaying
         const eventDetailsContainer = document.getElementById('eventDetails');
         eventDetailsContainer.innerHTML = `
@@ -320,8 +315,21 @@
                 <div class="row">
                     ${generateReleasesHTML(selectedEvent)}
                 </div>
+                <!-- Delete Event Button -->
+                <div class="row mt-4">
+                    <div class="col-md-12 d-flex justify-content-start">
+                        <button type="button" class="btn btn-danger" onclick="deleteEvent(${selectedEvent.event_id})">Delete Event</button>
+                    </div>
+                </div>
             </div>
         `;
+    }
+
+    // Function to delete an event
+    function deleteEvent(eventId) {
+        if (confirm("Are you sure you want to delete this event?")) {
+            window.location.href = `/delete-event?event_id=${eventId}`;
+        }
     }
 
     // Utility function to safely format date values
